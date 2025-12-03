@@ -61,6 +61,8 @@ sealed interface EditTransactionViewEvent {
     data class SetHasChanges(val hasChangesValue: Boolean) : EditTransactionViewEvent
     data class UpdateExchangeRate(val exRate: Double?) : EditTransactionViewEvent
 
+    data class UpdateConvertedAmountByUserInput(val amount: Double) : EditTransactionViewEvent
+
     sealed interface TagEvent : EditTransactionViewEvent {
         data class SaveTag(val name: String) : TagEvent
         data class OnTagSelect(val selectedTag: Tag) : TagEvent

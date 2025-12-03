@@ -112,6 +112,7 @@ fun BoxWithConstraintsScope.EditBottomSheet(
     onSelectedAccountChanged: (Account) -> Unit,
     onToAccountChanged: (Account) -> Unit,
     onAddNewAccount: () -> Unit,
+    onShowEditConvertedAmountModal: () -> Unit,
     modifier: Modifier = Modifier, // Modifier comes after other parameters
     convertedAmount: Double? = null,
     convertedAmountCurrencyCode: String? = null,
@@ -244,6 +245,7 @@ fun BoxWithConstraintsScope.EditBottomSheet(
                 hideKeyboard(rootView)
                 internalExpanded = true
             },
+            onShowEditConvertedAmountModal = onShowEditConvertedAmountModal
         )
 
         val lastSpacer = lerp(20f, 8f, percentCollapsed)
@@ -678,6 +680,7 @@ private fun Amount(
     label: String,
     account: Account?,
     onShowAmountModal: () -> Unit,
+    onShowEditConvertedAmountModal: () -> Unit,
     showConvertedAmountText: String? = null,
     onAccountMiniClick: () -> Unit
 
@@ -723,7 +726,10 @@ private fun Amount(
                     style = UI.typo.nB2.style(
                         color = UI.colors.pureInverse,
                         fontWeight = FontWeight.SemiBold
-                    )
+                    ),
+                    modifier = Modifier.clickableNoIndication(rememberInteractionSource()) {
+                        onShowEditConvertedAmountModal()
+                    }
                 )
             }
         }
@@ -823,7 +829,8 @@ private fun Preview() {
                 onAmountChanged = {},
                 onSelectedAccountChanged = {},
                 onToAccountChanged = {},
-                onAddNewAccount = {}
+                onAddNewAccount = {},
+                onShowEditConvertedAmountModal = {}
             )
         }
     }
@@ -862,7 +869,8 @@ private fun Preview_Transfer() {
                 onAmountChanged = {},
                 onSelectedAccountChanged = {},
                 onToAccountChanged = {},
-                onAddNewAccount = {}
+                onAddNewAccount = {},
+                onShowEditConvertedAmountModal = {}
             )
         }
     }

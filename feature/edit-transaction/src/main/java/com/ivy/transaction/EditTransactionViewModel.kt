@@ -337,6 +337,7 @@ class EditTransactionViewModel @Inject constructor(
             is EditTransactionViewEvent.SetHasChanges -> setHasChanges(event.hasChangesValue)
             is EditTransactionViewEvent.UpdateExchangeRate -> updateExchangeRate(event.exRate)
             is EditTransactionViewEvent.TagEvent -> handleTagEvent(event)
+            is EditTransactionViewEvent.UpdateConvertedAmountByUserInput -> updateConvertedAmountByUserInput(event.amount)
         }
     }
 
@@ -893,6 +894,17 @@ class EditTransactionViewModel @Inject constructor(
             }
         }
     }
+
+    private fun updateConvertedAmountByUserInput(newValue: Double) = viewModelScope.launch {
+        computationThread {
+            customExchangeRateState = customExchangeRateState.copy(convertedAmount = newValue)
+            uiThread {
+                saveIfEditMode()
+            }
+        }
+    }
+
+
 
     private fun isCustomExchangeRateCurrencyCodeMatchingWithSourceAndDestinationAccountCurrencyCode(
         toAccCurrencyCode: String,
