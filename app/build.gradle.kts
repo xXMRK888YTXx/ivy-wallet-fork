@@ -146,6 +146,7 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.transactions)
     implementation(projects.feature.poll.impl)
+    implementation(projects.feature.telegramBackup)
     implementation(projects.shared.base)
     implementation(projects.shared.data.core)
     implementation(projects.shared.domain)

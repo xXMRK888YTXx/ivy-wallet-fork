@@ -41,6 +41,7 @@ import com.ivy.navigation.ReportScreen
 import com.ivy.navigation.Screen
 import com.ivy.navigation.SearchScreen
 import com.ivy.navigation.SettingsScreen
+import com.ivy.navigation.TelegramBackupScreen
 import com.ivy.navigation.TransactionsScreen
 import com.ivy.onboarding.OnboardingScreen
 import com.ivy.piechart.PieChartStatisticScreen
@@ -88,5 +89,6 @@ fun BoxWithConstraintsScope.IvyNavGraph(screen: Screen?) {
         ReleasesScreen -> ReleasesScreenImpl()
         DisclaimerScreen -> DisclaimerScreenImpl()
         PollScreen -> PollScreen()
+        TelegramBackupScreen -> com.xxmrk888ytxx.telegrambackup.TelegramBackupScreen()
     }
 }
