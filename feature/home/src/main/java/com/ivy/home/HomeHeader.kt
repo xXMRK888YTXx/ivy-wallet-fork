@@ -4,7 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -116,6 +118,7 @@ internal fun HomeHeader(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeaderStickyRow(
     percentExpanded: Float,
@@ -144,6 +147,7 @@ private fun HeaderStickyRow(
             Text(
                 modifier = Modifier
                     .alpha(percentExpanded)
+                    .basicMarquee(iterations = Int.MAX_VALUE)
                     .testTag("home_greeting_text"),
                 text = if (name.isNotNullOrBlank()) {
                     stringResource(
