@@ -19,6 +19,11 @@ object DatastoreKeys {
     val GITHUB_LAST_BACKUP_EPOCH_SEC =
         longPreferencesKey("github_backup_last_backup_time_epoch_sec")
 
+    val TELEGRAM_USER_ID_KEY = stringPreferencesKey("telegram_user_id")
+
+    val TELEGRAM_BOT_ID_KEY = stringPreferencesKey("telegram_bot_id")
+
+
     fun ivyFeature(key: String): Preferences.Key<Boolean> {
         return booleanPreferencesKey("feature_$key")
     }
