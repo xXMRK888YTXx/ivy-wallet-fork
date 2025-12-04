@@ -6,8 +6,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
+import com.ivy.base.Toaster
+import com.ivy.domain.exception.InvalidTelegramDataException
+import com.ivy.domain.exception.NetworkException
 import com.ivy.domain.model.TelegramData
 import com.ivy.domain.usecase.telegram.ManageTelegramDataUseCase
+import com.ivy.domain.usecase.telegram.TelegramUseCase
 import com.ivy.ui.ComposeViewModel
 import com.xxmrk888ytxx.telegrambackup.model.TelegramBackupEvent
 import com.xxmrk888ytxx.telegrambackup.model.TelegramBackupState
@@ -23,6 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TelegramBackupViewModel @Inject constructor(
     private val manageTelegramDataUseCase: ManageTelegramDataUseCase,
+    private val telegramUseCase: TelegramUseCase,
+    private val toaster: Toaster
 ) : ComposeViewModel<TelegramBackupState, TelegramBackupEvent>() {
 
     private val _uiState = MutableStateFlow<TelegramBackupState>(TelegramBackupState.Loading)
@@ -54,6 +60,23 @@ class TelegramBackupViewModel @Inject constructor(
             _uiState.value as? TelegramBackupState.EnterTelegramData ?: return@launch
         val telegramData =
             TelegramData(enterTelegramDataState.userId, enterTelegramDataState.botToken)
+        _uiState.value = TelegramBackupState.Loading
+        telegramUseCase.validateTelegramData(telegramData)
+            .onSuccess {
+                manageTelegramDataUseCase.setupTelegramData(telegramData)
+                toaster.show("Telegram data saved successfully")
+                _uiState.value = TelegramBackupState.BackupConfiguration
+            }
+            .onFailure { exception ->
+                _uiState.value = enterTelegramDataState
+
+                val toastMessage = when (exception) {
+                    is NetworkException -> "Telegram is unavailable. Check your Internet connection"
+                    is InvalidTelegramDataException -> "Invalid telegram data"
+                    else -> "Unknown error"
+                }
+                toaster.show(toastMessage)
+            }
 
 
     }
