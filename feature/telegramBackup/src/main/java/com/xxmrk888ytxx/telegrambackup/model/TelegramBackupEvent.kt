@@ -6,4 +6,12 @@ sealed interface TelegramBackupEvent {
     data class BotTokenTextFieldChanged(val text: String) : TelegramBackupEvent
 
     object SaveNewTelegramData : TelegramBackupEvent
+
+    data class ChangeTelegramBackupState(val isEnabled: Boolean) : TelegramBackupEvent
+
+    data class ChangeBackupRepeatTimeEvent(val backupRepeatTime: BackupRepeatTime) : TelegramBackupEvent
+
+    object RemoveTelegramDataEvent : TelegramBackupEvent
+
+    object CreateBackupNowEvent : TelegramBackupEvent
 }

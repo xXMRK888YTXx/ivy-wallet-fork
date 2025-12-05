@@ -9,5 +9,5 @@ sealed interface TelegramBackupState {
         val isSaveButtonEnabled: Boolean = false
     ) : TelegramBackupState
 
-    object BackupConfiguration : TelegramBackupState
+    data class BackupConfiguration(val backupSettings: BackupSettings = BackupSettings()) : TelegramBackupState
 }

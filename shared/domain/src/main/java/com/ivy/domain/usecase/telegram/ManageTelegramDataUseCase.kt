@@ -22,5 +22,7 @@ class ManageTelegramDataUseCase @Inject constructor(
         telegramDataRepository.writeTelegramData(telegramData.userId, telegramData.botToken)
     }
 
-    suspend fun removeTelegramData() = telegramDataRepository.removeTelegramData()
+    suspend fun removeTelegramData() {
+        telegramDataRepository.removeTelegramData()
+    }
 }

@@ -9,15 +9,25 @@ import androidx.lifecycle.viewModelScope
 import com.ivy.base.Toaster
 import com.ivy.domain.exception.InvalidTelegramDataException
 import com.ivy.domain.exception.NetworkException
+import com.ivy.domain.model.TelegramBackupRepeatTime
+import com.ivy.domain.model.TelegramBackupSettings
 import com.ivy.domain.model.TelegramData
+import com.ivy.domain.usecase.telegram.ManageTelegramBackupSettingsUseCase
 import com.ivy.domain.usecase.telegram.ManageTelegramDataUseCase
 import com.ivy.domain.usecase.telegram.TelegramUseCase
 import com.ivy.ui.ComposeViewModel
+import com.xxmrk888ytxx.telegrambackup.model.BackupRepeatTime
+import com.xxmrk888ytxx.telegrambackup.model.BackupSettings
+import com.xxmrk888ytxx.telegrambackup.model.BackupRepeatTime.Companion.toBackupTime
 import com.xxmrk888ytxx.telegrambackup.model.TelegramBackupEvent
 import com.xxmrk888ytxx.telegrambackup.model.TelegramBackupState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,15 +38,28 @@ import javax.inject.Inject
 class TelegramBackupViewModel @Inject constructor(
     private val manageTelegramDataUseCase: ManageTelegramDataUseCase,
     private val telegramUseCase: TelegramUseCase,
-    private val toaster: Toaster
+    private val toaster: Toaster,
+    private val manageTelegramBackupSettingsUseCase: ManageTelegramBackupSettingsUseCase
 ) : ComposeViewModel<TelegramBackupState, TelegramBackupEvent>() {
 
     private val _uiState = MutableStateFlow<TelegramBackupState>(TelegramBackupState.Loading)
 
+    private val uiState = combine(
+        _uiState,
+        manageTelegramBackupSettingsUseCase.backupSettings
+    ) { uiState, backupSettings ->
+        when (uiState) {
+            is TelegramBackupState.BackupConfiguration -> TelegramBackupState.BackupConfiguration(
+                backupSettings.toBackupSettings()
+            )
+
+            else -> uiState
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TelegramBackupState.Loading)
 
     @Composable
     override fun uiState(): TelegramBackupState {
-        val uiState by _uiState.collectAsState()
+        val uiState by uiState.collectAsState()
         return uiState
     }
 
@@ -52,7 +75,45 @@ class TelegramBackupViewModel @Inject constructor(
             }
 
             is TelegramBackupEvent.SaveNewTelegramData -> saveTelegramData()
+
+            is TelegramBackupEvent.ChangeTelegramBackupState -> changeTelegramBackupState(event.isEnabled)
+
+            is TelegramBackupEvent.ChangeBackupRepeatTimeEvent -> changeTelegramBackupRepeatTime(event.backupRepeatTime)
+
+            TelegramBackupEvent.RemoveTelegramDataEvent -> removeTelegramData()
+
+            TelegramBackupEvent.CreateBackupNowEvent -> createBackupNow()
         }
+    }
+
+    private fun createBackupNow(): Unit = TODO()
+
+    private fun removeTelegramData() {
+        viewModelScope.launch {
+            toLoadingState()
+            changeTelegramBackupState(false)
+            manageTelegramDataUseCase.removeTelegramData()
+            toEnterTelegramDataState()
+            toaster.show("Telegram data removed successfully.")
+        }
+    }
+
+    private fun changeTelegramBackupRepeatTime(backupRepeatTime: BackupRepeatTime) =
+        viewModelScope.launch {
+            manageTelegramBackupSettingsUseCase.setBackupTime(backupRepeatTime.toTelegramBackupRepeatTime())
+        }
+
+    private fun BackupRepeatTime.toTelegramBackupRepeatTime(): TelegramBackupRepeatTime {
+        return when(this) {
+            BackupRepeatTime.HOURS_6 -> TelegramBackupRepeatTime.HOURS_6
+            BackupRepeatTime.HOURS_12 -> TelegramBackupRepeatTime.HOURS_12
+            BackupRepeatTime.DAY_1 -> TelegramBackupRepeatTime.DAY_1
+            BackupRepeatTime.WEEK_1 -> TelegramBackupRepeatTime.WEEK_1
+        }
+    }
+
+    private fun changeTelegramBackupState(isEnabled: Boolean) = viewModelScope.launch {
+        manageTelegramBackupSettingsUseCase.setEnableState(isEnabled)
     }
 
     private fun saveTelegramData() = viewModelScope.launch {
@@ -60,12 +121,12 @@ class TelegramBackupViewModel @Inject constructor(
             _uiState.value as? TelegramBackupState.EnterTelegramData ?: return@launch
         val telegramData =
             TelegramData(enterTelegramDataState.userId, enterTelegramDataState.botToken)
-        _uiState.value = TelegramBackupState.Loading
+        toLoadingState()
         telegramUseCase.validateTelegramData(telegramData)
             .onSuccess {
                 manageTelegramDataUseCase.setupTelegramData(telegramData)
                 toaster.show("Telegram data saved successfully")
-                _uiState.value = TelegramBackupState.BackupConfiguration
+                toBackupConfigurationState()
             }
             .onFailure { exception ->
                 _uiState.value = enterTelegramDataState
@@ -101,8 +162,24 @@ class TelegramBackupViewModel @Inject constructor(
         val isTelegramDataSetup = manageTelegramDataUseCase.telegramData.first() != null
 
         when (isTelegramDataSetup) {
-            true -> _uiState.update { TelegramBackupState.BackupConfiguration }
-            false -> _uiState.update { TelegramBackupState.EnterTelegramData() }
+            true -> toBackupConfigurationState()
+            false -> toEnterTelegramDataState()
         }
+    }
+
+    fun toEnterTelegramDataState() {
+        _uiState.update { TelegramBackupState.EnterTelegramData() }
+    }
+
+    fun toBackupConfigurationState() {
+        _uiState.update { TelegramBackupState.BackupConfiguration() }
+    }
+
+    fun toLoadingState() {
+        _uiState.update { TelegramBackupState.Loading }
+    }
+
+    private fun TelegramBackupSettings.toBackupSettings(): BackupSettings {
+        return BackupSettings(isEnabled, telegramBackupRepeatTime.toBackupTime())
     }
 }

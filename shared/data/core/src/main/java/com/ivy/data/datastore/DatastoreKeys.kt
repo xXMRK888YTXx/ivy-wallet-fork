@@ -23,6 +23,10 @@ object DatastoreKeys {
 
     val TELEGRAM_BOT_ID_KEY = stringPreferencesKey("telegram_bot_id")
 
+    val IS_TELEGRAM_BACKUP_ENABLED_KEY = booleanPreferencesKey("is_telegram_backup_enabled_key")
+
+    val TELEGRAM_BACKUP_REPEAT_TIME_KEY = longPreferencesKey("telegram_backup_repeat_time_key")
+
 
     fun ivyFeature(key: String): Preferences.Key<Boolean> {
         return booleanPreferencesKey("feature_$key")
