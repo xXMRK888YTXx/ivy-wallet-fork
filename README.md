@@ -1,14 +1,14 @@
-# [Fork Name]: Unofficial Support and Extension
+# Ivy Wallet Fork by xXMRK888YTXx
 
-This repository represents a fork of the original application, created to add current features and ongoing support.
+This repository represents a fork of the original application, created to add current features.
 
-You can download the compiled forked application in the [Releases](link_to_releases) section.
+You can download the compiled forked application in the [Releases](https://github.com/xXMRK888YTXx/ivy-wallet/releases) section.
 
 ## ⚙️ Change Log
 
-### Updates and Dependency Cleanup
+### Updates Dependency
 
-* The `targetSdk` has been updated to **36**.
+* The `targetSdk` has been updated to **36 (Android 16)**.
 * **Firebase Crashlytics** and **Google Services** have been completely removed.
 
 ### New Features
@@ -26,7 +26,7 @@ You can download the compiled forked application in the [Releases](link_to_relea
 
 The original application is no longer supported. If you have any suggestions for improvement, please contact me. If time and opportunity permit, I will review and implement your idea.
 
-> **Important Note:** Translation into languages other than English is not currently implemented.
+> **Important Note:** Translation into languages other than English is not currently implemented. I'm some lazy)
 
 ---
 
@@ -35,7 +35,6 @@ The original application is no longer supported. If you have any suggestions for
 The following is the unchanged text of the original `README` file.
 
 ___________________________________________________________________
-[Insert the copied text of the original README here]
 
 
 
