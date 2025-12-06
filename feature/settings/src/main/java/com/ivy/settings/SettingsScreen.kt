@@ -54,6 +54,8 @@ import com.ivy.navigation.FeaturesScreen
 import com.ivy.navigation.ImportScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.ReleasesScreen
+import com.ivy.navigation.Screen
+import com.ivy.navigation.TelegramBackupScreen
 import com.ivy.navigation.navigation
 import com.ivy.navigation.screenScopedViewModel
 import com.ivy.ui.R
@@ -82,6 +84,7 @@ fun BoxWithConstraintsScope.SettingsScreen() {
     val viewModel: SettingsViewModel = screenScopedViewModel()
     val uiState = viewModel.uiState()
     val rootScreen = rootScreen()
+    val nav = navigation()
 
     UI(
         currencyCode = uiState.currencyCode,
@@ -136,6 +139,9 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         },
         onSwitchLanguage = {
             viewModel.onEvent(SettingsEvent.SwitchLanguage)
+        },
+        onBackupToTelegram = {
+            nav.navigateTo(TelegramBackupScreen)
         }
     )
 }
@@ -168,7 +174,8 @@ private fun BoxWithConstraintsScope.UI(
     onSetStartDateOfMonth: (Int) -> Unit = {},
     onDeleteAllUserData: () -> Unit = {},
     onDeleteCloudUserData: () -> Unit = {},
-    onSwitchLanguage: () -> Unit = {}
+    onSwitchLanguage: () -> Unit = {},
+    onBackupToTelegram: () -> Unit
 ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var nameModalVisible by remember { mutableStateOf(false) }
@@ -255,6 +262,17 @@ private fun BoxWithConstraintsScope.UI(
                 iconPadding = 8.dp
             ) {
                 onBackupData()
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+
+            SettingsDefaultButton(
+                icon = R.drawable.telegram,
+                text = stringResource(R.string.auto_backup_to_telegram),
+                iconPadding = 8.dp
+            ) {
+                onBackupToTelegram()
             }
 
             Spacer(Modifier.height(12.dp))
@@ -414,7 +432,6 @@ private fun BoxWithConstraintsScope.UI(
                 text = stringResource(R.string.rate_us_on_google_play),
                 backgroundGradient = GradientIvy
             ) {
-                rootScreen.reviewIvyWallet(dismissReviewCard = false)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -1182,7 +1199,8 @@ private fun Preview(theme: Theme = Theme.LIGHT) {
             lockApp = false,
             currencyCode = "BGN",
             onSetCurrency = {},
-            languageOptionVisible = true
+            languageOptionVisible = true,
+            onBackupToTelegram = {}
         )
     }
 }

@@ -134,6 +134,8 @@ data object ExchangeRatesScreen : Screen {
         get() = true
 }
 
+data object TelegramBackupScreen : Screen
+
 data object FeaturesScreen : Screen
 
 data object AttributionsScreen : Screen

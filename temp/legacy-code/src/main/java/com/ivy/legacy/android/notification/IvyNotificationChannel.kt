@@ -20,6 +20,14 @@ enum class IvyNotificationChannel(
         description = "Reminding you to record your transactions on a daily basis.",
         importance = NotificationManager.IMPORTANCE_HIGH,
         bypassDnd = false
+    ),
+
+    TELEGRAM_BACKUP_ERRORS(
+        channelId = "telegram_backup_errors",
+        channelName = "Telegram backup errors",
+        description = "Reports errors during backup in Telegram",
+        importance = NotificationManager.IMPORTANCE_DEFAULT,
+        bypassDnd = false
     );
 
     @SuppressLint("WrongConstant")

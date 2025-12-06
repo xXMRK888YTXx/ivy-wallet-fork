@@ -181,6 +181,9 @@ fun BoxWithConstraintsScope.EditTransactionScreen(screen: EditTransactionScreen)
         onExchangeRateChange = {
             viewModel.onEvent(EditTransactionViewEvent.UpdateExchangeRate(it))
         },
+        onUpdateConvertedAmountByUserInput = {
+            viewModel.onEvent(EditTransactionViewEvent.UpdateConvertedAmountByUserInput(it))
+        },
         onTagOperation = {
             viewModel.onEvent(it)
         }
@@ -219,6 +222,7 @@ private fun BoxWithConstraintsScope.UI(
     onSetDate: () -> Unit,
     onSetTime: () -> Unit,
     onSetTransactionType: (TransactionType) -> Unit,
+    onUpdateConvertedAmountByUserInput:(Double) -> Unit,
 
     onCreateCategory: (CreateCategoryData) -> Unit,
     onEditCategory: (Category) -> Unit,
@@ -244,6 +248,7 @@ private fun BoxWithConstraintsScope.UI(
     var changeTransactionTypeModalVisible by remember { mutableStateOf(false) }
     var amountModalShown by remember { mutableStateOf(false) }
     var exchangeRateAmountModalShown by remember { mutableStateOf(false) }
+    var editConvertedAmountModalShown by remember { mutableStateOf(false) }
     var accountChangeModal by remember { mutableStateOf(false) }
     val waitModalVisible by remember(backgroundProcessing) {
         mutableStateOf(backgroundProcessing)
@@ -511,7 +516,8 @@ private fun BoxWithConstraintsScope.UI(
             accountModalData = AccountModalData(
                 account = null, baseCurrency = baseCurrency, balance = 0.0
             )
-        }
+        },
+        onShowEditConvertedAmountModal = { editConvertedAmountModalShown = true }
     )
 
     // Modals
@@ -604,11 +610,21 @@ private fun BoxWithConstraintsScope.UI(
         currency = "",
         initialAmount = customExchangeRateState.exchangeRate,
         dismiss = { exchangeRateAmountModalShown = false },
-        decimalCountMax = IvyCurrency.getDecimalPlaces(
-            customExchangeRateState.toCurrencyCode ?: baseCurrency
-        ),
+        decimalCountMax = 6,
         onAmountChanged = {
             onExchangeRateChange(it)
+        }
+    )
+
+    AmountModal(
+        id = amountModalId,
+        visible = editConvertedAmountModalShown,
+        currency = customExchangeRateState.toCurrencyCode ?: "",
+        initialAmount = customExchangeRateState.convertedAmount,
+        dismiss = { editConvertedAmountModalShown = false },
+        decimalCountMax = 6,
+        onAmountChanged = {
+            onUpdateConvertedAmountByUserInput(it)
         }
     )
 
@@ -700,7 +716,8 @@ private fun BoxWithConstraintsScope.Preview(isDark: Boolean = false) {
             onCreateAccount = { },
             onSetDate = {},
             onSetTime = {},
-            onSetTransactionType = {}
+            onSetTransactionType = {},
+            onUpdateConvertedAmountByUserInput = {}
         )
     }
 }

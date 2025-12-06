@@ -156,7 +156,6 @@ class CustomerJourneyCardsProvider @Inject constructor(
       background = Gradient.solid(Green),
       hasDismiss = true,
       onAction = { _, _, ivyActivity ->
-        ivyActivity.reviewIvyWallet(dismissReviewCard = true)
       }
     )
 

@@ -1,3 +1,6 @@
+
+val FORK_XXMRK888YTXX_SUFFIX = ".fork.com.xxmrk888ytxx"
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -6,8 +9,6 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     id("io.gitlab.arturbosch.detekt")
 }
 
@@ -58,6 +59,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             resValue("string", "app_name", "Ivy Wallet")
+            applicationIdSuffix = FORK_XXMRK888YTXX_SUFFIX
         }
 
         debug {
@@ -69,7 +71,7 @@ android {
 
             signingConfig = signingConfigs.getByName("debug")
 
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = "$FORK_XXMRK888YTXX_SUFFIX.debug"
             resValue("string", "app_name", "Ivy Wallet Debug")
         }
 
@@ -88,7 +90,7 @@ android {
 
             signingConfig = signingConfigs.getByName("debug")
 
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = "$FORK_XXMRK888YTXX_SUFFIX.debug"
             resValue("string", "app_name", "Ivy Wallet")
         }
     }
@@ -146,6 +148,7 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.transactions)
     implementation(projects.feature.poll.impl)
+    implementation(projects.feature.telegramBackup)
     implementation(projects.shared.base)
     implementation(projects.shared.data.core)
     implementation(projects.shared.domain)
@@ -162,8 +165,6 @@ dependencies {
     implementation(libs.bundles.arrow)
     implementation(libs.bundles.compose)
     implementation(libs.bundles.activity)
-    implementation(libs.bundles.google)
-    implementation(libs.bundles.firebase)
     implementation(libs.datastore)
     implementation(libs.androidx.security)
     implementation(libs.androidx.biometrics)

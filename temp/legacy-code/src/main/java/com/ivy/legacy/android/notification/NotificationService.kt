@@ -1,5 +1,6 @@
 package com.ivy.wallet.android.notification
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -12,6 +13,15 @@ class NotificationService @Inject constructor(
     @ApplicationContext
     private val context: Context
 ) {
+
+    val notificationService by lazy {
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    val telegramBackupErrorsNotificationChannel: IvyNotificationChannel by lazy {
+        IvyNotificationChannel.TELEGRAM_BACKUP_ERRORS
+            .also { notificationService.createNotificationChannel(it.create(context)) }
+    }
 
     fun defaultIvyNotification(
         channel: IvyNotificationChannel,

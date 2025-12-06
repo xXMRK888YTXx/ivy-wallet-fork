@@ -281,7 +281,8 @@ private fun BoxWithConstraintsScope.UI(
                     )
                 )
             )
-        }
+        },
+        onShowEditConvertedAmountModal = {}
     )
 
     // Modals
