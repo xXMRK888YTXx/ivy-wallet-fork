@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltAndroidApp
 class IvyAndroidApp : Application(), Configuration.Provider {
     @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+    lateinit var workerFactory: IvyWorkerFactory
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()

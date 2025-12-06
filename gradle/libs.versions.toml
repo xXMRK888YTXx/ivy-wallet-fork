@@ -1,4 +1,5 @@
 [versions]
+hilt-compiler = "..."
 kotlin = "2.0.20"
 kotlin-coroutines = "1.8.1"
 ktor = "2.3.12"
@@ -29,6 +30,7 @@ detekt = "1.23.6" # https://detekt.dev/docs/gettingstarted/gradle/
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version = "8.13.1" }
 
 # Kotlin
+dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt-compiler" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }

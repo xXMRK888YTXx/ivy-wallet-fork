@@ -86,7 +86,7 @@ class TelegramBackupViewModel @Inject constructor(
         }
     }
 
-    private fun createBackupNow(): Unit = TODO()
+    private fun createBackupNow() = viewModelScope.launch { manageTelegramBackupSettingsUseCase.makeBackupNow() }
 
     private fun removeTelegramData() {
         viewModelScope.launch {

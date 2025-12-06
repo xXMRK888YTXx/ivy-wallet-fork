@@ -27,6 +27,9 @@ object DatastoreKeys {
 
     val TELEGRAM_BACKUP_REPEAT_TIME_KEY = longPreferencesKey("telegram_backup_repeat_time_key")
 
+    val LAST_BACKUP_HASH_KEY = stringPreferencesKey("last_backup_hash_key")
+
+
 
     fun ivyFeature(key: String): Preferences.Key<Boolean> {
         return booleanPreferencesKey("feature_$key")

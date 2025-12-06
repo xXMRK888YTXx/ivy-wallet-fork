@@ -15,6 +15,10 @@ dependencies {
     api(libs.datastore)
     implementation(libs.bundles.ktor)
 
+    implementation(libs.androidx.work)
+    ksp(libs.hilt.compiler)
+
+
     testImplementation(projects.shared.data.modelTesting)
     androidTestImplementation(libs.bundles.integration.testing)
 }

@@ -1,6 +1,6 @@
 package com.ivy.domain.model
 
-import com.ivy.data.repository.TelegramBackupSettingsRepository.Companion.DEFAULT_TELEGRAM_BACKUP_REPEAT_TIME_IN_MILLS
+import com.ivy.data.repository.TelegramBackupRepository.Companion.DEFAULT_TELEGRAM_BACKUP_REPEAT_TIME_IN_MILLS
 
 enum class TelegramBackupRepeatTime(val timeInMills: Long) {
     HOURS_6(DEFAULT_TELEGRAM_BACKUP_REPEAT_TIME_IN_MILLS),
