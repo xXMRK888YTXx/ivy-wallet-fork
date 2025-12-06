@@ -1,3 +1,6 @@
+
+val FORK_XXMRK888YTXX_SUFFIX = ".fork.com.xxmrk888ytxx"
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -56,6 +59,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             resValue("string", "app_name", "Ivy Wallet")
+            applicationIdSuffix = FORK_XXMRK888YTXX_SUFFIX
         }
 
         debug {
@@ -67,7 +71,7 @@ android {
 
             signingConfig = signingConfigs.getByName("debug")
 
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = "$FORK_XXMRK888YTXX_SUFFIX.debug"
             resValue("string", "app_name", "Ivy Wallet Debug")
         }
 
@@ -86,7 +90,7 @@ android {
 
             signingConfig = signingConfigs.getByName("debug")
 
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = "$FORK_XXMRK888YTXX_SUFFIX.debug"
             resValue("string", "app_name", "Ivy Wallet")
         }
     }
