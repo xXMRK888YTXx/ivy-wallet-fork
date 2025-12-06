@@ -1,7 +1,7 @@
 package com.ivy.data.remote.impl
 
 import android.content.Context
-import com.ivy.data.exception.ApiExceptionData
+import com.ivy.data.exception.ApiDataException
 import com.ivy.data.exception.DataIvyException
 import com.ivy.data.exception.DataUnknownException
 import com.ivy.data.exception.NoConnectionExceptionData
@@ -44,7 +44,7 @@ class TelegramDataSourceImpl(
 
         when (result.status.value) {
             in 200..299 -> Result.success(Unit)
-            in 400..499 -> throw ApiExceptionData()
+            in 400..499 -> throw ApiDataException()
             else -> throw DataUnknownException()
         }
     }
@@ -80,7 +80,7 @@ class TelegramDataSourceImpl(
 
         when(result.status.value) {
             in 200..299 -> Result.success(Unit)
-            in 400..499 -> throw ApiExceptionData()
+            in 400..499 -> throw ApiDataException()
             else -> throw DataUnknownException()
         }
     }
@@ -92,7 +92,7 @@ class TelegramDataSourceImpl(
                 try {
                     block()
                 } catch (e: ClientRequestException) {
-                    throw ApiExceptionData(e.stackTraceToString())
+                    throw ApiDataException(e.stackTraceToString())
                 } catch (e: IOException) {
                     throw NoConnectionExceptionData(e.stackTraceToString())
                 } catch (e: DataIvyException) {

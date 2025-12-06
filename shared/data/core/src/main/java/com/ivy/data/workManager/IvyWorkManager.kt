@@ -23,8 +23,13 @@ class IvyWorkManager @Inject constructor(
     }
 
     internal fun runSingleBackupToTelegram() {
+        val inputData = androidx.work.Data.Builder()
+            .putBoolean(TelegramBackupWorker.IS_SINGLE_WORK_KEY,true)
+            .build()
+
         val worker = OneTimeWorkRequestBuilder<TelegramBackupWorker>()
             .addTag(SINGLE_BACKUP_WORKER_NAME)
+            .setInputData(inputData)
             .setConstraints(constraintsForTelegramBackupWorkers)
             .build()
 
