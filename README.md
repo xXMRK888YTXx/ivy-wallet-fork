@@ -1,3 +1,71 @@
+# [Fork Name]: Unofficial Support and Extension
+
+This repository represents a fork of the original application, created to add current features and ongoing support.
+
+You can download the compiled forked application in the [Releases](link_to_releases) section.
+
+## ⚙️ Change Log
+
+### Updates and Dependency Cleanup
+
+* The `targetSdk` has been updated to **36**.
+* **Firebase Crashlytics** and **Google Services** have been completely removed.
+
+### New Features
+
+* **Manual Currency Input:** Added the ability to **manually specify the exact amount** of currency to be transferred to an account with another currency (previously, only the exchange rate input was available).
+* **Telegram Integration:** Added a function for **automatically uploading a backup copy** to Telegram.
+
+### Fixes
+
+* Minor UI changes and fixes.
+
+---
+
+### 💬 Collaboration
+
+The original application is no longer supported. If you have any suggestions for improvement, please contact me. If time and opportunity permit, I will review and implement your idea.
+
+> **Important Note:** Translation into languages other than English is not currently implemented.
+
+---
+
+## 📄 Original README
+
+The following is the unchanged text of the original `README` file.
+
+___________________________________________________________________
+[Insert the copied text of the original README here]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 >[!IMPORTANT]
 >**🚨 Notice: Project No Longer Maintained 🚨**
 >
