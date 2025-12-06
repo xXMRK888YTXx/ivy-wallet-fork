@@ -432,7 +432,6 @@ private fun BoxWithConstraintsScope.UI(
                 text = stringResource(R.string.rate_us_on_google_play),
                 backgroundGradient = GradientIvy
             ) {
-                rootScreen.reviewIvyWallet(dismissReviewCard = false)
             }
 
             Spacer(Modifier.height(12.dp))
