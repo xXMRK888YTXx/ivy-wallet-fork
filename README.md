@@ -4,17 +4,25 @@ This repository represents a fork of the original application, created to add cu
 
 You can download the compiled forked application in the [Releases](https://github.com/xXMRK888YTXx/ivy-wallet/releases) section.
 
-## ⚙️ Change Log
+## ⚙️ Key Differences & Improvements (compared to Original Ivy Wallet)
 
-### Updates Dependency
-
-* The `targetSdk` has been updated to **36 (Android 16)**.
-* **Firebase Crashlytics** and **Google Services** have been completely removed.
-
-### New Features
-
-* **Manual Currency Input:** Added the ability to **manually specify the exact amount** of currency to be transferred to an account with another currency (previously, only the exchange rate input was available).
-* **Telegram Integration:** Added a function for **automatically uploading a backup copy** to Telegram.
+* **Bank Push Notification Processor:**
+  * *Original app:* Had no background listener or notification parsing functionality.
+  * *This fork:* Adds a background service (`IvyNotificationListenerService`) to automatically
+    intercept and parse bank push notifications. Extracts transaction amounts, supports multiple
+    detected amounts (primary + clickable alternative chips), provides a native Home screen banner
+    with bottom-sheet modal (`animateItemPlacement`, outside click dismiss), and includes full
+    settings (app selector, customizable Regex with real-time validation and save/reset).
+* **Secondary Currency Display:**
+  * *Original app:* Converted and added secondary currency balances directly into the total balance
+    banner.
+  * *This fork:* Displays secondary currency totals separately on the Home screen without adding
+    them to the primary total.
+* **Navigation & Back Button Fixes:**
+  * *Original app:* Had legacy navigation issues where pressing back from non-home screens or action
+    modals unexpectedly exited the app to the launcher.
+  * *This fork:* Resolves back-stack navigation to ensure smooth screen transitions without
+    accidental app exits.
 
 ### Fixes
 
