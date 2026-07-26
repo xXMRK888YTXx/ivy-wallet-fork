@@ -19,4 +19,7 @@ sealed interface SettingsEvent {
     data object DeleteCloudUserData : SettingsEvent
     data object DeleteAllUserData : SettingsEvent
     data object SwitchLanguage : SettingsEvent
+    data class SetNotificationParserEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetNotificationTargetPackage(val targetPackage: String) : SettingsEvent
+    data class SetNotificationRegexPattern(val regexPattern: String) : SettingsEvent
 }

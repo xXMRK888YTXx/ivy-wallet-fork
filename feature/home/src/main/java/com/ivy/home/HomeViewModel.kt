@@ -12,7 +12,11 @@ import com.ivy.base.legacy.Transaction
 import com.ivy.base.legacy.TransactionHistoryItem
 import com.ivy.base.time.TimeConverter
 import com.ivy.base.time.TimeProvider
+import com.ivy.data.model.AccountId
 import com.ivy.data.model.primitive.AssetCode
+import com.ivy.data.model.primitive.ColorInt
+import com.ivy.data.model.primitive.IconAsset
+import com.ivy.data.model.primitive.NotBlankTrimmedString
 import com.ivy.data.repository.CategoryRepository
 import com.ivy.data.repository.mapper.TransactionMapper
 import com.ivy.domain.features.Features
@@ -41,6 +45,7 @@ import com.ivy.navigation.MainScreen
 import com.ivy.navigation.Navigation
 import com.ivy.ui.ComposeViewModel
 import com.ivy.wallet.domain.action.account.AccountsAct
+import com.ivy.wallet.domain.action.account.CalcAccBalanceAct
 import com.ivy.wallet.domain.action.global.StartDayOfMonthAct
 import com.ivy.wallet.domain.action.settings.CalcBufferDiffAct
 import com.ivy.wallet.domain.action.settings.SettingsAct
@@ -75,6 +80,7 @@ class HomeViewModel @Inject constructor(
     private val historyWithDateDivsAct: HistoryWithDateDivsAct,
     private val calcIncomeExpenseAct: CalcIncomeExpenseAct,
     private val calcWalletBalanceAct: CalcWalletBalanceAct,
+    private val calcAccBalanceAct: CalcAccBalanceAct,
     private val settingsAct: SettingsAct,
     private val accountsAct: AccountsAct,
     private val categoryRepository: CategoryRepository,
@@ -92,7 +98,8 @@ class HomeViewModel @Inject constructor(
     private val transactionMapper: TransactionMapper,
     private val timeProvider: TimeProvider,
     private val timeConverter: TimeConverter,
-    private val features: Features
+    private val features: Features,
+    private val parsedNotificationDao: com.ivy.data.db.dao.read.ParsedNotificationDao
 ) : ComposeViewModel<HomeState, HomeEvent>() {
     private var currentTheme by mutableStateOf(Theme.AUTO)
     private var name by mutableStateOf("")
@@ -107,6 +114,8 @@ class HomeViewModel @Inject constructor(
     private var history by mutableStateOf<ImmutableList<TransactionHistoryItem>>(persistentListOf())
     private var stats by mutableStateOf(IncomeExpensePair.zero())
     private var balance by mutableStateOf(BigDecimal.ZERO)
+    private var currencyBalances by mutableStateOf<ImmutableList<CurrencyBalance>>(persistentListOf())
+    private var pendingBankNotifications by mutableStateOf<ImmutableList<com.ivy.data.db.entity.ParsedNotificationEntity>>(persistentListOf())
     private var buffer by mutableStateOf(
         BufferInfo(
             amount = BigDecimal.ZERO,
@@ -147,6 +156,7 @@ class HomeViewModel @Inject constructor(
             history = getHistory(),
             stats = getStats(),
             balance = getBalance(),
+            currencyBalances = getCurrencyBalances(),
             buffer = getBuffer(),
             upcoming = getUpcoming(),
             overdue = getOverdue(),
@@ -154,7 +164,8 @@ class HomeViewModel @Inject constructor(
             hideBalance = getHideBalance(),
             expanded = getExpanded(),
             hideIncome = getHideIncome(),
-            shouldShowAccountSpecificColorInTransactions = getShouldShowAccountSpecificColorInTransactions()
+            shouldShowAccountSpecificColorInTransactions = getShouldShowAccountSpecificColorInTransactions(),
+            pendingBankNotifications = pendingBankNotifications
         )
     }
 
@@ -196,6 +207,11 @@ class HomeViewModel @Inject constructor(
     @Composable
     private fun getBalance(): BigDecimal {
         return balance
+    }
+
+    @Composable
+    private fun getCurrencyBalances(): ImmutableList<CurrencyBalance> {
+        return currencyBalances
     }
 
     @Composable
@@ -252,11 +268,30 @@ class HomeViewModel @Inject constructor(
                 HomeEvent.SwitchTheme -> switchTheme()
                 is HomeEvent.DismissCustomerJourneyCard -> dismissCustomerJourneyCard(event.card)
                 is HomeEvent.SetExpanded -> setExpanded(event.expanded)
+                is HomeEvent.MarkNotificationUsed -> markNotificationUsed(event.notificationId)
+                HomeEvent.ClearAllPendingNotifications -> clearAllPendingNotifications()
             }
         }
     }
 
+    private fun markNotificationUsed(id: String) {
+        viewModelScope.launch {
+            parsedNotificationDao.markAsUsed(id)
+        }
+    }
+
+    private fun clearAllPendingNotifications() {
+        viewModelScope.launch {
+            parsedNotificationDao.markAllAsUsed()
+        }
+    }
+
     private suspend fun start() {
+        viewModelScope.launch {
+            parsedNotificationDao.getPendingNotificationsFlow().collect { notifications ->
+                pendingBankNotifications = notifications.toImmutableList()
+            }
+        }
         suspend {
             val startDay = startDayOfMonthAct(Unit)
             ivyContext.initSelectedPeriodInMemory(
@@ -332,10 +367,45 @@ class HomeViewModel @Inject constructor(
             CalcWalletBalanceAct.Input(baseCurrency = settings.baseCurrency)
         )
 
-        balance = balanceAmount
+        val includedAccounts = accounts.filter { it.includeInBalance }
+        val calcResults = includedAccounts.mapNotNull { account ->
+            val nameNotBlank = NotBlankTrimmedString.from(account.name).getOrNull() ?: return@mapNotNull null
+            val assetCode = AssetCode.from(account.currency ?: settings.baseCurrency).getOrNull() ?: return@mapNotNull null
+            val domainAccount = com.ivy.data.model.Account(
+                id = AccountId(account.id),
+                name = nameNotBlank,
+                asset = assetCode,
+                color = ColorInt(account.color),
+                icon = account.icon?.let { IconAsset.from(it).getOrNull() },
+                includeInBalance = account.includeInBalance,
+                orderNum = account.orderNum,
+            )
+            calcAccBalanceAct(CalcAccBalanceAct.Input(account = domainAccount))
+        }
+
+        val currencyGrouped = calcResults
+            .groupBy { it.account.asset.code }
+
+        val mainCurrencyBalance = currencyGrouped[settings.baseCurrency]
+            ?.fold(BigDecimal.ZERO) { acc, out -> acc + out.balance }
+            ?: BigDecimal.ZERO
+
+        val secondaryCurrencyBalances = currencyGrouped
+            .filterKeys { it != settings.baseCurrency }
+            .map { (curr, outputs) ->
+                CurrencyBalance(
+                    currency = curr,
+                    balance = outputs.fold(BigDecimal.ZERO) { acc, out -> acc + out.balance }
+                )
+            }
+            .sortedBy { it.currency }
+            .toImmutableList()
+
+        balance = mainCurrencyBalance
+        currencyBalances = secondaryCurrencyBalances
         stats = incomeExpense
 
-        return Triple(settings, timeRange, balanceAmount)
+        return Triple(settings, timeRange, mainCurrencyBalance)
     }
 
     private suspend fun loadBuffer(

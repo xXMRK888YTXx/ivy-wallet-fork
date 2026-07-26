@@ -71,6 +71,12 @@ class SettingsViewModel @Inject constructor(
     private val startDateOfMonth = mutableIntStateOf(1)
     private val progressState = mutableStateOf(false)
 
+    private val notificationParserEnabled = mutableStateOf(false)
+    private val notificationTargetPackage = mutableStateOf("")
+    private val notificationRegexPattern = mutableStateOf(
+        "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?"
+    )
+
     @Composable
     override fun uiState(): SettingsState {
         LaunchedEffect(Unit) {
@@ -88,7 +94,10 @@ class SettingsViewModel @Inject constructor(
             startDateOfMonth = getStartDateOfMonth(),
             progressState = getProgressState(),
             hideIncome = getHideIncome(),
-            languageOptionVisible = isLanguageOptionVisible()
+            languageOptionVisible = isLanguageOptionVisible(),
+            notificationParserEnabled = notificationParserEnabled.value,
+            notificationTargetPackage = notificationTargetPackage.value,
+            notificationRegexPattern = notificationRegexPattern.value
         )
     }
 
@@ -102,6 +111,20 @@ class SettingsViewModel @Inject constructor(
         initializeHideIncome()
         initializeTransfersAsIncomeExpense()
         initializeStartDateOfMonth()
+        initializeNotificationParserSettings()
+    }
+
+    private fun initializeNotificationParserSettings() {
+        notificationParserEnabled.value = sharedPrefs.getBoolean(
+            SharedPrefs.NOTIFICATION_PARSER_ENABLED, false
+        )
+        notificationTargetPackage.value = sharedPrefs.getString(
+            SharedPrefs.NOTIFICATION_TARGET_PACKAGE, ""
+        ) ?: ""
+        notificationRegexPattern.value = sharedPrefs.getString(
+            SharedPrefs.NOTIFICATION_REGEX_PATTERN,
+            "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?"
+        ) ?: "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?"
     }
 
     private suspend fun initializeCurrency() {
@@ -233,6 +256,9 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.DeleteCloudUserData -> deleteCloudUserData()
             SettingsEvent.DeleteAllUserData -> deleteAllUserData()
             SettingsEvent.SwitchLanguage -> switchLanguage()
+            is SettingsEvent.SetNotificationParserEnabled -> setNotificationParserEnabled(event.enabled)
+            is SettingsEvent.SetNotificationTargetPackage -> setNotificationTargetPackage(event.targetPackage)
+            is SettingsEvent.SetNotificationRegexPattern -> setNotificationRegexPattern(event.regexPattern)
         }
     }
 
@@ -403,6 +429,27 @@ class SettingsViewModel @Inject constructor(
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.data = Uri.fromParts("package", context.packageName, null)
             context.applicationContext.startActivity(intent)
+        }
+    }
+
+    private fun setNotificationParserEnabled(enabled: Boolean) {
+        notificationParserEnabled.value = enabled
+        viewModelScope.launch {
+            sharedPrefs.putBoolean(SharedPrefs.NOTIFICATION_PARSER_ENABLED, enabled)
+        }
+    }
+
+    private fun setNotificationTargetPackage(targetPackage: String) {
+        notificationTargetPackage.value = targetPackage
+        viewModelScope.launch {
+            sharedPrefs.putString(SharedPrefs.NOTIFICATION_TARGET_PACKAGE, targetPackage)
+        }
+    }
+
+    private fun setNotificationRegexPattern(regexPattern: String) {
+        notificationRegexPattern.value = regexPattern
+        viewModelScope.launch {
+            sharedPrefs.putString(SharedPrefs.NOTIFICATION_REGEX_PATTERN, regexPattern)
         }
     }
 }

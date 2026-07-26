@@ -164,6 +164,7 @@ fun BoxWithConstraintsScope.HomeUi(
                 onEvent(HomeEvent.SetExpanded(it))
             },
             balance = uiState.balance,
+            currencyBalances = uiState.currencyBalances,
             onOpenMoreMenu = {
                 setMoreMenuExpanded(true)
             },
@@ -189,6 +190,16 @@ fun BoxWithConstraintsScope.HomeUi(
             history = uiState.history,
 
             customerJourneyCards = uiState.customerJourneyCards,
+            pendingBankNotifications = uiState.pendingBankNotifications,
+            onNotificationSelected = { notification ->
+                onEvent(HomeEvent.MarkNotificationUsed(notification.id))
+            },
+            onNotificationDeleted = { notification ->
+                onEvent(HomeEvent.MarkNotificationUsed(notification.id))
+            },
+            onClearAllNotifications = {
+                onEvent(HomeEvent.ClearAllPendingNotifications)
+            },
             shouldShowAccountSpecificColorInTransactions = uiState.shouldShowAccountSpecificColorInTransactions,
 
             onPayOrGet = forward<Transaction>() then2 {
@@ -295,10 +306,15 @@ fun HomeLazyColumn(
     upcoming: LegacyDueSection,
     overdue: LegacyDueSection,
     balance: BigDecimal,
+    currencyBalances: ImmutableList<CurrencyBalance> = persistentListOf(),
     stats: IncomeExpensePair,
     history: ImmutableList<TransactionHistoryItem>,
 
     customerJourneyCards: ImmutableList<CustomerJourneyCardModel>,
+    pendingBankNotifications: ImmutableList<com.ivy.data.db.entity.ParsedNotificationEntity> = persistentListOf(),
+    onNotificationSelected: (com.ivy.data.db.entity.ParsedNotificationEntity) -> Unit = {},
+    onNotificationDeleted: (com.ivy.data.db.entity.ParsedNotificationEntity) -> Unit = {},
+    onClearAllNotifications: () -> Unit = {},
 
     setUpcomingExpanded: (Boolean) -> Unit,
     setOverdueExpanded: (Boolean) -> Unit,
@@ -343,6 +359,7 @@ fun HomeLazyColumn(
             CashFlowInfo(
                 currency = baseData.baseCurrency,
                 balance = balance.toDouble(),
+                currencyBalances = currencyBalances,
 
                 hideBalance = hideBalance,
 
@@ -361,6 +378,15 @@ fun HomeLazyColumn(
             Spacer(Modifier.height(16.dp))
 
             TransactionsDividerLine()
+        }
+
+        item {
+            PendingBankNotificationsSection(
+                pendingNotifications = pendingBankNotifications,
+                onNotificationSelected = onNotificationSelected,
+                onNotificationDeleted = onNotificationDeleted,
+                onClearAllNotifications = onClearAllNotifications
+            )
         }
 
         item {

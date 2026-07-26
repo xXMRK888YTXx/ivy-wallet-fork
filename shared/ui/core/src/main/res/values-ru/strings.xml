@@ -444,4 +444,30 @@
     <string name="search_tags">Теги поиска</string>
     <string name="language">Язык</string>
     <string name="budget_exceeded_info">Бюджет превышен на %1$s %2$s</string>
+    <string name="bank_notification_monitoring_title">Мониторинг банковских SMS / уведомлений</string>
+    <string name="bank_notification_auto_process">Автообработка уведомлений банка</string>
+    <string name="bank_notification_auto_process_desc">Извлекает суммы из банковских Push-уведомлений и сохраняет для подтверждения</string>
+    <string name="bank_notification_permission_granted">Доступ к уведомлениям предоставлен ✓</string>
+    <string name="bank_notification_permission_granted_desc">Нажмите для управления доступом в настройках Android</string>
+    <string name="bank_notification_permission_required">⚠️ Требуется доступ к уведомлениям</string>
+    <string name="bank_notification_permission_required_desc">Нажмите здесь, чтобы открыть настройки Android и включить доступ для Ivy Wallet</string>
+    <string name="bank_notification_package_name">Имя пакета банка (Package Name)</string>
+    <string name="bank_notification_package_placeholder">Пример: com.bank.app (или оставьте пустым для всех)</string>
+    <string name="bank_notification_select_installed_app">📱 Выбрать из установленных приложений</string>
+    <string name="bank_notification_regex_pattern">Регулярное выражение (Regex для суммы)</string>
+    <string name="bank_notification_regex_placeholder">По умолчанию: \\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?</string>
+    <string name="bank_notification_regex_hint">Пример уведомления: (-50 BYN) или 120.50 USD. Группа 1 = сумма, Группа 2 = валюта.</string>
+    <string name="bank_notification_pending_title">🔔 Необработанные банком (%1$d)</string>
+    <string name="bank_notification_monitored_apps">Отслеживаемые приложения</string>
+    <string name="bank_notification_add_package_hint">Введите имя пакета…</string>
+    <string name="bank_notification_add">Добавить</string>
+    <string name="bank_notification_all_apps_hint">Если список приложений пуст, проверяются уведомления от всех приложений по шаблону Regex.</string>
+    <string name="bank_notification_select_app_dialog_title">Выберите приложение банка</string>
+    <string name="bank_notification_search_placeholder">Поиск по имени или пакету…</string>
+    <string name="bank_notification_card_desc">Нажмите, чтобы просмотреть и добавить операции</string>
+    <string name="bank_notification_clear_all">Очистить все</string>
+    <string name="bank_notification_regex_invalid">⚠️ Некорректный синтаксис регулярного выражения</string>
+    <string name="bank_notification_save_regex">Сохранить шаблон</string>
+    <string name="bank_notification_restore_default">Сбросить по умолчанию</string>
+    <string name="bank_notification_regex_saved">Шаблон сохранён ✓</string>
 </resources>

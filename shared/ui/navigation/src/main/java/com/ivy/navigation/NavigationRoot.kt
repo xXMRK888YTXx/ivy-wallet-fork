@@ -1,10 +1,13 @@
 package com.ivy.navigation
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -20,7 +23,15 @@ fun NavigationRoot(
     CompositionLocalProvider(
         LocalNavigation provides navigation,
     ) {
+        val context = LocalContext.current
         val viewModelStore = LocalViewModelStoreOwner.current
+
+        BackHandler(enabled = navigation.canGoBack()) {
+            if (!navigation.onBackPressed()) {
+                (context as? Activity)?.finish()
+            }
+        }
+
         DisposableEffect(navigation.currentScreen) {
             onDispose {
                 // Destroy viewModels only for non-legacy screens

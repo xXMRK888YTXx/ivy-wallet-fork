@@ -238,6 +238,7 @@ fun AddModalBackHandling(
                         }
                     )
                 )
+                nav.notifyBackStateChanged()
             }
         }
 
@@ -253,6 +254,7 @@ fun AddModalBackHandling(
 private fun removeLastBackHandlerSafe(nav: Navigation) {
     if (nav.modalBackHandling.isNotEmpty()) {
         nav.modalBackHandling.pop()
+        nav.notifyBackStateChanged()
     }
 }
 

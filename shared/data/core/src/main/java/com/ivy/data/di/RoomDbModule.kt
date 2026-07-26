@@ -109,6 +109,13 @@ object RoomDbModule {
     }
 
     @Provides
+    fun provideParsedNotificationDao(
+        db: IvyRoomDatabase
+    ): com.ivy.data.db.dao.read.ParsedNotificationDao {
+        return db.parsedNotificationDao
+    }
+
+    @Provides
     fun provideWriteAccountDao(db: IvyRoomDatabase): WriteAccountDao {
         return db.writeAccountDao
     }

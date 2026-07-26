@@ -496,4 +496,30 @@
     <string name="language">Language</string>
     <string name="advanced_features">Advanced features</string>
     <string name="auto_backup_to_telegram" translatable="false">Auto backup to Telegram</string>
+    <string name="bank_notification_monitoring_title">Bank SMS / Notification Monitoring</string>
+    <string name="bank_notification_auto_process">Auto-process bank notifications</string>
+    <string name="bank_notification_auto_process_desc">Extracts amounts from bank Push notifications and saves them for review</string>
+    <string name="bank_notification_permission_granted">Notification Access Granted ✓</string>
+    <string name="bank_notification_permission_granted_desc">Tap to manage notification access in Android Settings</string>
+    <string name="bank_notification_permission_required">⚠️ Notification Access Required</string>
+    <string name="bank_notification_permission_required_desc">Tap here to open Android Settings and grant notification access to Ivy Wallet</string>
+    <string name="bank_notification_package_name">Bank Package Name</string>
+    <string name="bank_notification_package_placeholder">Example: com.bank.app (or leave empty for all)</string>
+    <string name="bank_notification_select_installed_app">📱 Select from installed apps</string>
+    <string name="bank_notification_regex_pattern">Regular Expression (Amount Regex)</string>
+    <string name="bank_notification_regex_placeholder">Default: \\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?</string>
+    <string name="bank_notification_regex_hint">Notification example: (-50 BYN) or 120.50 USD. Group 1 = amount, Group 2 = currency.</string>
+    <string name="bank_notification_select_app_dialog_title">Select Bank Application</string>
+    <string name="bank_notification_search_placeholder">Search by name or package…</string>
+    <string name="bank_notification_pending_title">🔔 Unprocessed bank notifications (%1$d)</string>
+    <string name="bank_notification_monitored_apps">Monitored Applications</string>
+    <string name="bank_notification_add_package_hint">Enter package name…</string>
+    <string name="bank_notification_add">Add</string>
+    <string name="bank_notification_all_apps_hint">If no applications are added, notifications from all apps will be checked against the Regex pattern.</string>
+    <string name="bank_notification_card_desc">Tap to view and add to financial records</string>
+    <string name="bank_notification_clear_all">Clear all</string>
+    <string name="bank_notification_regex_invalid">⚠️ Invalid regular expression syntax</string>
+    <string name="bank_notification_save_regex">Save pattern</string>
+    <string name="bank_notification_restore_default">Reset to default</string>
+    <string name="bank_notification_regex_saved">Pattern saved ✓</string>
 </resources>
