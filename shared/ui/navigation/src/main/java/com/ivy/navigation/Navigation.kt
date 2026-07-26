@@ -15,6 +15,13 @@ class Navigation @Inject constructor() {
   var currentScreen: Screen? by mutableStateOf(null)
     private set
 
+  var backStateVersion by mutableStateOf(0)
+    private set
+
+  fun notifyBackStateChanged() {
+    backStateVersion++
+  }
+
   @Deprecated("Legacy code. Don't use it, please.")
   val modalBackHandling: Stack<ModalBackHandler> = Stack()
 
@@ -40,31 +47,53 @@ class Navigation @Inject constructor() {
     }
   }
 
+  fun canGoBack(): Boolean {
+    @Suppress("UNUSED_VARIABLE")
+    val dummy = backStateVersion
+    if (modalBackHandling.isNotEmpty()) {
+      return true
+    }
+    if (!backStack.empty()) {
+      return true
+    }
+    val current = currentScreen
+    if (current != null && onBackPressed.containsKey(current)) {
+      return true
+    }
+    return false
+  }
+
   fun navigateTo(screen: Screen) {
     if (lastScreen != null) {
       backStack.push(lastScreen)
     }
     switchScreen(screen)
+    notifyBackStateChanged()
   }
 
   fun backStackEmpty() = backStack.empty()
 
   private fun popBackStack() {
     backStack.pop()
+    notifyBackStateChanged()
   }
 
   @Deprecated("Legacy code. Don't use it, please.")
   fun onBackPressed(): Boolean {
-    if (modalBackHandling.isNotEmpty()) {
-      return modalBackHandling.peek().onBackPressed()
+    val result = if (modalBackHandling.isNotEmpty()) {
+      modalBackHandling.peek().onBackPressed()
+    } else {
+      val specialHandling = onBackPressed.getOrDefault(currentScreen) { false }.invoke()
+      specialHandling || back()
     }
-    val specialHandling = onBackPressed.getOrDefault(currentScreen) { false }.invoke()
-    return specialHandling || back()
+    notifyBackStateChanged()
+    return result
   }
 
   fun back(): Boolean {
     if (!backStack.empty()) {
       switchScreen(backStack.pop())
+      notifyBackStateChanged()
       return true
     }
     return false
@@ -77,8 +106,9 @@ class Navigation @Inject constructor() {
 
   fun resetBackStack() {
     while (!backStackEmpty()) {
-      popBackStack()
+      backStack.pop()
     }
     lastScreen = null
+    notifyBackStateChanged()
   }
 }
