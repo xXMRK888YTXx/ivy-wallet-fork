@@ -10,7 +10,14 @@ import com.ivy.legacy.data.LegacyDueSection
 import com.ivy.legacy.data.model.TimePeriod
 import com.ivy.wallet.domain.pure.data.IncomeExpensePair
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import java.math.BigDecimal
+
+@Immutable
+data class CurrencyBalance(
+    val currency: String,
+    val balance: BigDecimal
+)
 
 @Immutable
 data class HomeState(
@@ -24,6 +31,7 @@ data class HomeState(
     val stats: IncomeExpensePair,
 
     val balance: BigDecimal,
+    val currencyBalances: ImmutableList<CurrencyBalance> = persistentListOf(),
 
     val buffer: BufferInfo,
 

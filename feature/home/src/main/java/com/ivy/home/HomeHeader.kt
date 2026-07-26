@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +52,8 @@ import com.ivy.legacy.utils.horizontalSwipeListener
 import com.ivy.legacy.utils.isNotNullOrBlank
 import com.ivy.legacy.utils.rememberInteractionSource
 import com.ivy.legacy.utils.rememberSwipeListenerState
+import com.ivy.legacy.utils.shouldShortAmount
+import com.ivy.legacy.utils.shortenAmount
 import com.ivy.legacy.utils.springBounce
 import com.ivy.legacy.utils.verticalSwipeListener
 import com.ivy.navigation.PieChartStatisticScreen
@@ -64,6 +69,8 @@ import com.ivy.wallet.ui.theme.components.BalanceRowMini
 import com.ivy.wallet.ui.theme.components.IvyIcon
 import com.ivy.wallet.ui.theme.components.IvyOutlinedButton
 import com.ivy.wallet.ui.theme.wallet.AmountCurrencyB1
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.math.absoluteValue
 
 @ExperimentalAnimationApi
@@ -220,6 +227,7 @@ private fun HeaderStickyRow(
 fun CashFlowInfo(
     currency: String,
     balance: Double,
+    currencyBalances: ImmutableList<CurrencyBalance> = persistentListOf(),
     monthlyIncome: Double,
     monthlyExpenses: Double,
     hideBalance: Boolean,
@@ -257,6 +265,34 @@ fun CashFlowInfo(
             shortenBigNumbers = true,
             hiddenMode = hideBalance
         )
+
+        if (currencyBalances.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("home_other_currencies"),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items(currencyBalances, key = { it.currency }) { item ->
+                    OtherCurrencyBalanceItem(
+                        currency = item.currency,
+                        balance = item.balance.toDouble(),
+                        hiddenMode = hideBalance,
+                        onClick = {
+                            if (hideBalance) {
+                                onHiddenBalanceClick()
+                            } else {
+                                onBalanceClick()
+                            }
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -425,5 +461,46 @@ private fun RowScope.HeaderCard(
         }
 
         Spacer(Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun OtherCurrencyBalanceItem(
+    currency: String,
+    balance: Double,
+    hiddenMode: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shortAmount = shouldShortAmount(balance)
+    val integerPartFormatted = if (shortAmount) {
+        shortenAmount(balance)
+    } else {
+        balance.format(currency)
+    }
+
+    val text = if (hiddenMode) {
+        "$currency ****"
+    } else {
+        "$currency $integerPartFormatted"
+    }
+
+    Box(
+        modifier = modifier
+            .clip(UI.shapes.rFull)
+            .background(UI.colors.medium.copy(alpha = 0.5f))
+            .clickableNoIndication(rememberInteractionSource()) {
+                onClick()
+            }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = UI.typo.c.style(
+                fontWeight = FontWeight.Bold,
+                color = UI.colors.pureInverse
+            )
+        )
     }
 }

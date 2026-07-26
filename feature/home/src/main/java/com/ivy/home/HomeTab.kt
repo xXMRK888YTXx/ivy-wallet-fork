@@ -164,6 +164,7 @@ fun BoxWithConstraintsScope.HomeUi(
                 onEvent(HomeEvent.SetExpanded(it))
             },
             balance = uiState.balance,
+            currencyBalances = uiState.currencyBalances,
             onOpenMoreMenu = {
                 setMoreMenuExpanded(true)
             },
@@ -295,6 +296,7 @@ fun HomeLazyColumn(
     upcoming: LegacyDueSection,
     overdue: LegacyDueSection,
     balance: BigDecimal,
+    currencyBalances: ImmutableList<CurrencyBalance> = persistentListOf(),
     stats: IncomeExpensePair,
     history: ImmutableList<TransactionHistoryItem>,
 
@@ -343,6 +345,7 @@ fun HomeLazyColumn(
             CashFlowInfo(
                 currency = baseData.baseCurrency,
                 balance = balance.toDouble(),
+                currencyBalances = currencyBalances,
 
                 hideBalance = hideBalance,
 
