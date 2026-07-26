@@ -107,8 +107,10 @@ class EditTransactionViewModel @Inject constructor(
     private val timeConverter: TimeConverter,
     private val timeProvider: TimeProvider,
     private val dateTimePicker: DateTimePicker,
+    private val parsedNotificationDao: com.ivy.data.db.dao.read.ParsedNotificationDao,
 ) : ComposeViewModel<EditTransactionViewState, EditTransactionViewEvent>() {
 
+    private var initialNotificationId: String? = null
     private var transactionType by mutableStateOf(TransactionType.EXPENSE)
     private var initialTitle by mutableStateOf<String?>(null)
     private var titleSuggestions by mutableStateOf(persistentSetOf<String>())
@@ -148,6 +150,7 @@ class EditTransactionViewModel @Inject constructor(
 
     fun start(screen: EditTransactionScreen) {
         viewModelScope.launch {
+            initialNotificationId = screen.initialNotificationId
             editMode = screen.initialTransactionId != null
 
             baseUserCurrency = baseCurrency()
@@ -174,8 +177,10 @@ class EditTransactionViewModel @Inject constructor(
                 ),
                 categoryId = screen.categoryId,
                 type = screen.type,
-                amount = BigDecimal.ZERO,
-                toAmount = BigDecimal.ZERO
+                amount = screen.initialAmount?.toBigDecimal() ?: BigDecimal.ZERO,
+                toAmount = screen.initialAmount?.toBigDecimal() ?: BigDecimal.ZERO,
+                title = screen.initialTitle,
+                description = screen.initialNote
             )
 
             tags = tagList.await()
@@ -750,6 +755,10 @@ class EditTransactionViewModel @Inject constructor(
 
                 loadedTransaction().toDomain(transactionMapper)?.let {
                     transactionRepo.save(it)
+                }
+
+                initialNotificationId?.let { notifId ->
+                    parsedNotificationDao.markAsUsed(notifId)
                 }
 
                 refreshWidget(WalletBalanceWidgetReceiver::class.java)

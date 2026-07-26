@@ -42,5 +42,6 @@ data class HomeState(
     val hideBalance: Boolean,
     val hideIncome: Boolean,
     val expanded: Boolean,
-    val shouldShowAccountSpecificColorInTransactions: Boolean
+    val shouldShowAccountSpecificColorInTransactions: Boolean,
+    val pendingBankNotifications: ImmutableList<com.ivy.data.db.entity.ParsedNotificationEntity> = persistentListOf()
 )

@@ -142,6 +142,18 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         },
         onBackupToTelegram = {
             nav.navigateTo(TelegramBackupScreen)
+        },
+        notificationParserEnabled = uiState.notificationParserEnabled,
+        notificationTargetPackage = uiState.notificationTargetPackage,
+        notificationRegexPattern = uiState.notificationRegexPattern,
+        onSetNotificationParserEnabled = {
+            viewModel.onEvent(SettingsEvent.SetNotificationParserEnabled(it))
+        },
+        onSetNotificationTargetPackage = {
+            viewModel.onEvent(SettingsEvent.SetNotificationTargetPackage(it))
+        },
+        onSetNotificationRegexPattern = {
+            viewModel.onEvent(SettingsEvent.SetNotificationRegexPattern(it))
         }
     )
 }
@@ -175,7 +187,13 @@ private fun BoxWithConstraintsScope.UI(
     onDeleteAllUserData: () -> Unit = {},
     onDeleteCloudUserData: () -> Unit = {},
     onSwitchLanguage: () -> Unit = {},
-    onBackupToTelegram: () -> Unit
+    onBackupToTelegram: () -> Unit,
+    notificationParserEnabled: Boolean = false,
+    notificationTargetPackage: String = "",
+    notificationRegexPattern: String = "",
+    onSetNotificationParserEnabled: (Boolean) -> Unit = {},
+    onSetNotificationTargetPackage: (String) -> Unit = {},
+    onSetNotificationRegexPattern: (String) -> Unit = {}
 ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var nameModalVisible by remember { mutableStateOf(false) }
@@ -404,6 +422,17 @@ private fun BoxWithConstraintsScope.UI(
 
             CustomFeatures(
                 onClick = { nav.navigateTo(FeaturesScreen) }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            NotificationParserSection(
+                enabled = notificationParserEnabled,
+                targetPackage = notificationTargetPackage,
+                regexPattern = notificationRegexPattern,
+                onSetEnabled = onSetNotificationParserEnabled,
+                onSetTargetPackage = onSetNotificationTargetPackage,
+                onSetRegexPattern = onSetNotificationRegexPattern
             )
         }
 
@@ -1149,7 +1178,7 @@ private fun CurrencyButton(
 }
 
 @Composable
-private fun SettingsSectionDivider(
+internal fun SettingsSectionDivider(
     text: String,
     color: Color = Gray
 ) {

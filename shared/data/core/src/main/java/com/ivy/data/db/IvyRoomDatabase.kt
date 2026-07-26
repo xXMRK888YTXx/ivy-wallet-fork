@@ -44,6 +44,7 @@ import com.ivy.data.db.migration.Migration126to127_LoanRecordType
 import com.ivy.data.db.migration.Migration127to128_PaidForDateRecord
 import com.ivy.data.db.migration.Migration128to129_DeleteIsDeleted
 import com.ivy.data.db.migration.Migration129to130_LoanIncludeNote
+import com.ivy.data.db.migration.Migration130to131_ParsedNotifications
 import com.ivy.domain.db.RoomTypeConverters
 import com.ivy.domain.db.migration.Migration105to106_TrnRecurringRules
 import com.ivy.domain.db.migration.Migration106to107_Wishlist
@@ -62,6 +63,11 @@ import com.ivy.domain.db.migration.Migration118to119_Loans
 import com.ivy.domain.db.migration.Migration119to120_LoanTransactions
 import com.ivy.domain.db.migration.Migration120to121_DropWishlistItem
 import com.ivy.domain.db.migration.Migration122to123_ExchangeRates
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.ivy.data.db.dao.read.ParsedNotificationDao
+import com.ivy.data.db.entity.ParsedNotificationEntity
+import com.ivy.data.db.migration.Migration131to132_AlternativeAmounts
 import com.ivy.domain.db.migration.Migration125to126_Tags
 
 @Database(
@@ -69,7 +75,8 @@ import com.ivy.domain.db.migration.Migration125to126_Tags
         AccountEntity::class, TransactionEntity::class, CategoryEntity::class,
         SettingsEntity::class, PlannedPaymentRuleEntity::class,
         UserEntity::class, ExchangeRateEntity::class, BudgetEntity::class,
-        LoanEntity::class, LoanRecordEntity::class, TagEntity::class, TagAssociationEntity::class
+        LoanEntity::class, LoanRecordEntity::class, TagEntity::class, TagAssociationEntity::class,
+        ParsedNotificationEntity::class
     ],
     autoMigrations = [
         AutoMigration(
@@ -78,7 +85,7 @@ import com.ivy.domain.db.migration.Migration125to126_Tags
             spec = IvyRoomDatabase.DeleteSEMigration::class
         )
     ],
-    version = 130,
+    version = 132,
     exportSchema = true
 )
 @TypeConverters(RoomTypeConverters::class)
@@ -95,6 +102,7 @@ abstract class IvyRoomDatabase : RoomDatabase() {
     abstract val loanRecordDao: LoanRecordDao
     abstract val tagDao: TagDao
     abstract val tagAssociationDao: TagAssociationDao
+    abstract val parsedNotificationDao: ParsedNotificationDao
 
     abstract val writeAccountDao: WriteAccountDao
     abstract val writeTransactionDao: WriteTransactionDao
@@ -135,7 +143,9 @@ abstract class IvyRoomDatabase : RoomDatabase() {
             Migration126to127_LoanRecordType(),
             Migration127to128_PaidForDateRecord(),
             Migration128to129_DeleteIsDeleted(),
-            Migration129to130_LoanIncludeNote()
+            Migration129to130_LoanIncludeNote(),
+            Migration130to131_ParsedNotifications(),
+            Migration131to132_AlternativeAmounts()
         )
 
         @Suppress("SpreadOperator")

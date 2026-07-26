@@ -13,5 +13,8 @@ data class SettingsState(
     val treatTransfersAsIncomeExpense: Boolean,
     val startDateOfMonth: String,
     val progressState: Boolean,
-    val languageOptionVisible: Boolean
+    val languageOptionVisible: Boolean,
+    val notificationParserEnabled: Boolean = false,
+    val notificationTargetPackage: String = "",
+    val notificationRegexPattern: String = "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?"
 )

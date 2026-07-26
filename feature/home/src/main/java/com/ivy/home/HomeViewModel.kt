@@ -98,7 +98,8 @@ class HomeViewModel @Inject constructor(
     private val transactionMapper: TransactionMapper,
     private val timeProvider: TimeProvider,
     private val timeConverter: TimeConverter,
-    private val features: Features
+    private val features: Features,
+    private val parsedNotificationDao: com.ivy.data.db.dao.read.ParsedNotificationDao
 ) : ComposeViewModel<HomeState, HomeEvent>() {
     private var currentTheme by mutableStateOf(Theme.AUTO)
     private var name by mutableStateOf("")
@@ -114,6 +115,7 @@ class HomeViewModel @Inject constructor(
     private var stats by mutableStateOf(IncomeExpensePair.zero())
     private var balance by mutableStateOf(BigDecimal.ZERO)
     private var currencyBalances by mutableStateOf<ImmutableList<CurrencyBalance>>(persistentListOf())
+    private var pendingBankNotifications by mutableStateOf<ImmutableList<com.ivy.data.db.entity.ParsedNotificationEntity>>(persistentListOf())
     private var buffer by mutableStateOf(
         BufferInfo(
             amount = BigDecimal.ZERO,
@@ -162,7 +164,8 @@ class HomeViewModel @Inject constructor(
             hideBalance = getHideBalance(),
             expanded = getExpanded(),
             hideIncome = getHideIncome(),
-            shouldShowAccountSpecificColorInTransactions = getShouldShowAccountSpecificColorInTransactions()
+            shouldShowAccountSpecificColorInTransactions = getShouldShowAccountSpecificColorInTransactions(),
+            pendingBankNotifications = pendingBankNotifications
         )
     }
 
@@ -265,11 +268,30 @@ class HomeViewModel @Inject constructor(
                 HomeEvent.SwitchTheme -> switchTheme()
                 is HomeEvent.DismissCustomerJourneyCard -> dismissCustomerJourneyCard(event.card)
                 is HomeEvent.SetExpanded -> setExpanded(event.expanded)
+                is HomeEvent.MarkNotificationUsed -> markNotificationUsed(event.notificationId)
+                HomeEvent.ClearAllPendingNotifications -> clearAllPendingNotifications()
             }
         }
     }
 
+    private fun markNotificationUsed(id: String) {
+        viewModelScope.launch {
+            parsedNotificationDao.markAsUsed(id)
+        }
+    }
+
+    private fun clearAllPendingNotifications() {
+        viewModelScope.launch {
+            parsedNotificationDao.markAllAsUsed()
+        }
+    }
+
     private suspend fun start() {
+        viewModelScope.launch {
+            parsedNotificationDao.getPendingNotificationsFlow().collect { notifications ->
+                pendingBankNotifications = notifications.toImmutableList()
+            }
+        }
         suspend {
             val startDay = startDayOfMonthAct(Unit)
             ivyContext.initSelectedPeriodInMemory(
