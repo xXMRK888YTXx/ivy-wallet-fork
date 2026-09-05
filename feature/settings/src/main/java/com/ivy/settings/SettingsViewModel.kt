@@ -9,6 +9,8 @@ import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -19,6 +21,7 @@ import com.ivy.data.backup.BackupDataUseCase
 import com.ivy.data.db.dao.read.SettingsDao
 import com.ivy.data.db.dao.write.WriteSettingsDao
 import com.ivy.data.model.primitive.AssetCode
+import com.ivy.domain.NotificationParserController
 import com.ivy.domain.RootScreen
 import com.ivy.domain.usecase.csv.ExportCsvUseCase
 import com.ivy.domain.usecase.exchange.SyncExchangeRatesUseCase
@@ -57,6 +60,7 @@ class SettingsViewModel @Inject constructor(
     private val updateSettingsAct: UpdateSettingsAct,
     private val settingsWriter: WriteSettingsDao,
     private val exportCsvUseCase: ExportCsvUseCase,
+    private val notificationParserController: NotificationParserController,
     @ApplicationContext private val context: Context
 ) : ComposeViewModel<SettingsState, SettingsEvent>() {
 
@@ -83,6 +87,8 @@ class SettingsViewModel @Inject constructor(
             onStart()
         }
 
+        val isConnected by notificationParserController.isConnected.collectAsState()
+
         return SettingsState(
             currencyCode = getCurrencyCode(),
             name = getName(),
@@ -97,7 +103,8 @@ class SettingsViewModel @Inject constructor(
             languageOptionVisible = isLanguageOptionVisible(),
             notificationParserEnabled = notificationParserEnabled.value,
             notificationTargetPackage = notificationTargetPackage.value,
-            notificationRegexPattern = notificationRegexPattern.value
+            notificationRegexPattern = notificationRegexPattern.value,
+            isNotificationListenerConnected = isConnected
         )
     }
 
@@ -259,6 +266,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetNotificationParserEnabled -> setNotificationParserEnabled(event.enabled)
             is SettingsEvent.SetNotificationTargetPackage -> setNotificationTargetPackage(event.targetPackage)
             is SettingsEvent.SetNotificationRegexPattern -> setNotificationRegexPattern(event.regexPattern)
+            SettingsEvent.ForceRebindNotificationListener -> notificationParserController.forceRebind()
         }
     }
 
@@ -436,6 +444,7 @@ class SettingsViewModel @Inject constructor(
         notificationParserEnabled.value = enabled
         viewModelScope.launch {
             sharedPrefs.putBoolean(SharedPrefs.NOTIFICATION_PARSER_ENABLED, enabled)
+            notificationParserController.updateParserEnabled(enabled)
         }
     }
 

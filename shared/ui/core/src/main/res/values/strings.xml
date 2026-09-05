@@ -522,4 +522,10 @@
     <string name="bank_notification_save_regex">Save pattern</string>
     <string name="bank_notification_restore_default">Reset to default</string>
     <string name="bank_notification_regex_saved">Pattern saved ✓</string>
+    <string name="bank_notification_status_connected">Listener service is active</string>
+    <string name="bank_notification_status_disconnected">Listener service disconnected</string>
+    <string name="bank_notification_rebind">Restart service</string>
+    <string name="bank_notification_battery_title">Battery Optimization</string>
+    <string name="bank_notification_battery_desc">Allow Ivy Wallet to run in background without restrictions</string>
+    <string name="bank_notification_battery_btn">Disable optimization</string>
 </resources>

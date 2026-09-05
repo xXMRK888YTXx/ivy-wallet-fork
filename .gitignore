@@ -110,3 +110,4 @@ node_modules/*
 /.idea/AndroidProjectSystem.xml
 /.idea/runConfigurations.xml
 .idea
+/app/release/

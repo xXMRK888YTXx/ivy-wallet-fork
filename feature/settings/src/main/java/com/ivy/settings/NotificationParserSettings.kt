@@ -3,6 +3,8 @@ package com.ivy.settings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -80,6 +82,30 @@ fun openNotificationListenerSettings(context: Context) {
     }
 }
 
+fun isBatteryOptimizationIgnored(context: Context): Boolean {
+    val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+    return pm?.isIgnoringBatteryOptimizations(context.packageName) ?: false
+}
+
+fun requestIgnoreBatteryOptimization(context: Context) {
+    try {
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${context.packageName}")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        try {
+            val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e2: Exception) {
+            e2.printStackTrace()
+        }
+    }
+}
+
 fun getInstalledAppsList(context: Context): List<InstalledAppInfo> {
     val pm = context.packageManager
     val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
@@ -119,6 +145,8 @@ fun NotificationParserSection(
     onSetEnabled: (Boolean) -> Unit,
     onSetTargetPackage: (String) -> Unit,
     onSetRegexPattern: (String) -> Unit,
+    isServiceConnected: Boolean = false,
+    onForceRebind: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -127,6 +155,7 @@ fun NotificationParserSection(
     var showAppPickerModal by remember { mutableStateOf(false) }
     var newPackageInput by remember { mutableStateOf("") }
     var permissionGranted by remember { mutableStateOf(isNotificationListenerPermissionGranted(context)) }
+    var batteryOptIgnored by remember { mutableStateOf(isBatteryOptimizationIgnored(context)) }
 
     val currentPackages = remember(targetPackage) { parsePackageList(targetPackage) }
 
@@ -134,6 +163,7 @@ fun NotificationParserSection(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 permissionGranted = isNotificationListenerPermissionGranted(context)
+                batteryOptIgnored = isBatteryOptimizationIgnored(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -259,6 +289,120 @@ fun NotificationParserSection(
                         },
                         style = UI.typo.c.style(color = UI.colors.pureInverse)
                     )
+                }
+            }
+
+            if (permissionGranted) {
+                Spacer(Modifier.height(12.dp))
+
+                // Service Status Card
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(UI.shapes.r4)
+                        .border(
+                            2.dp,
+                            if (isServiceConnected) Green.copy(alpha = 0.5f) else Red.copy(alpha = 0.5f),
+                            UI.shapes.r4
+                        )
+                        .background(
+                            if (isServiceConnected) Green.copy(alpha = 0.08f) else Red.copy(
+                                alpha = 0.08f
+                            )
+                        )
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .background((if (isServiceConnected) GradientGreen else GradientRed).asHorizontalBrush()),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IvyIconScaled(
+                                icon = if (isServiceConnected) R.drawable.ic_secure else R.drawable.ic_buffer_exceeded,
+                                iconScale = IconScale.S,
+                                tint = White
+                            )
+                        }
+
+                        Spacer(Modifier.width(12.dp))
+
+                        Column {
+                            Text(
+                                text = if (isServiceConnected) {
+                                    stringResource(R.string.bank_notification_status_connected)
+                                } else {
+                                    stringResource(R.string.bank_notification_status_disconnected)
+                                },
+                                style = UI.typo.b2.style(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = if (isServiceConnected) Green else Red
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+
+                    IvyButton(
+                        text = stringResource(R.string.bank_notification_rebind),
+                        backgroundGradient = if (isServiceConnected) GradientGreen else GradientRed
+                    ) {
+                        onForceRebind()
+                    }
+                }
+
+                if (!batteryOptIgnored) {
+                    Spacer(Modifier.height(12.dp))
+
+                    // Battery Optimization Notice Card
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(UI.shapes.r4)
+                            .border(
+                                2.dp,
+                                UI.colors.medium,
+                                UI.shapes.r4
+                            )
+                            .background(UI.colors.medium)
+                            .clickable { requestIgnoreBatteryOptimization(context) }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.bank_notification_battery_title),
+                                style = UI.typo.b2.style(
+                                    fontWeight = FontWeight.Bold,
+                                    color = UI.colors.pureInverse
+                                )
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.bank_notification_battery_desc),
+                                style = UI.typo.c.style(color = UI.colors.gray)
+                            )
+                        }
+
+                        Spacer(Modifier.width(8.dp))
+
+                        IvyOutlinedButton(
+                            text = stringResource(R.string.bank_notification_battery_btn),
+                            iconStart = null
+                        ) {
+                            requestIgnoreBatteryOptimization(context)
+                        }
+                    }
                 }
             }
 

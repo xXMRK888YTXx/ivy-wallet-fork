@@ -82,6 +82,9 @@ class RootActivity : AppCompatActivity(), RootScreen {
     @Inject
     lateinit var dateTimePicker: DateTimePicker
 
+    @Inject
+    lateinit var notificationParserController: com.ivy.domain.NotificationParserController
+
     private lateinit var createFileLauncher: ActivityResultLauncher<String>
     private lateinit var onFileCreated: (fileUri: Uri) -> Unit
 
@@ -311,6 +314,7 @@ class RootActivity : AppCompatActivity(), RootScreen {
         if (viewModel.isAppLockEnabled()) {
             viewModel.checkUserInactiveTimeStatus()
         }
+        notificationParserController.syncState()
     }
 
     override fun onPause() {
