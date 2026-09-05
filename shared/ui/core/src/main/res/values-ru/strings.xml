@@ -470,4 +470,10 @@
     <string name="bank_notification_save_regex">Сохранить шаблон</string>
     <string name="bank_notification_restore_default">Сбросить по умолчанию</string>
     <string name="bank_notification_regex_saved">Шаблон сохранён ✓</string>
+    <string name="bank_notification_status_connected">Слушатель уведомлений активен</string>
+    <string name="bank_notification_status_disconnected">Слушатель отключен</string>
+    <string name="bank_notification_rebind">Перезапустить службу</string>
+    <string name="bank_notification_battery_title">Оптимизация батареи</string>
+    <string name="bank_notification_battery_desc">Разрешите работу в фоне без ограничений, чтобы система не закрывала службу</string>
+    <string name="bank_notification_battery_btn">Отключить оптимизацию</string>
 </resources>

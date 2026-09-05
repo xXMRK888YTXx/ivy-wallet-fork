@@ -1,11 +1,14 @@
 package com.ivy.wallet.service
 
 import android.app.Notification
+import android.content.ComponentName
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.ivy.base.legacy.SharedPrefs
 import com.ivy.data.db.IvyRoomDatabase
 import com.ivy.data.db.entity.ParsedNotificationEntity
+import com.ivy.domain.NotificationParserController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,11 +16,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.UUID
+import timber.log.Timber
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 import javax.inject.Inject
-
-import java.util.concurrent.ConcurrentHashMap
 
 @AndroidEntryPoint
 class IvyNotificationListenerService : NotificationListenerService() {
@@ -28,18 +30,39 @@ class IvyNotificationListenerService : NotificationListenerService() {
     @Inject
     lateinit var database: IvyRoomDatabase
 
+    @Inject
+    lateinit var notificationParserController: NotificationParserController
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    companion object {
-        private val patternCache = ConcurrentHashMap<String, Pattern>()
+    private val patternCache = ConcurrentHashMap<String, Pattern>()
 
-        fun getOrCompilePattern(patternStr: String): Pattern {
-            return patternCache.computeIfAbsent(patternStr) { Pattern.compile(it) }
+    private fun getOrCompilePattern(patternStr: String): Pattern {
+        return patternCache.computeIfAbsent(patternStr) { Pattern.compile(it) }
+    }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        notificationParserController.setConnected(true)
+        Timber.d("IvyNotificationListenerService: onListenerConnected()")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        notificationParserController.setConnected(false)
+        Timber.w("IvyNotificationListenerService: onListenerDisconnected() -> attempting rebind")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                requestRebind(ComponentName(this, IvyNotificationListenerService::class.java))
+            } catch (t: Throwable) {
+                Timber.e(t, "IvyNotificationListenerService: Failed to requestRebind")
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        notificationParserController.setConnected(false)
         serviceScope.cancel()
     }
 
@@ -47,8 +70,22 @@ class IvyNotificationListenerService : NotificationListenerService() {
         super.onNotificationPosted(sbn)
         if (sbn == null) return
 
-        serviceScope.launch {
-            processNotification(sbn)
+        try {
+            serviceScope.launch {
+                try {
+                    processNotification(sbn)
+                } catch (t: Throwable) {
+                    Timber.e(
+                        t,
+                        "IvyNotificationListenerService: Error processing notification from ${sbn.packageName}"
+                    )
+                }
+            }
+        } catch (t: Throwable) {
+            Timber.e(
+                t,
+                "IvyNotificationListenerService: Error launching coroutine for notification from ${sbn.packageName}"
+            )
         }
     }
 

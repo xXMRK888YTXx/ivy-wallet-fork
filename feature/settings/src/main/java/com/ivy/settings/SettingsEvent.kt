@@ -22,4 +22,5 @@ sealed interface SettingsEvent {
     data class SetNotificationParserEnabled(val enabled: Boolean) : SettingsEvent
     data class SetNotificationTargetPackage(val targetPackage: String) : SettingsEvent
     data class SetNotificationRegexPattern(val regexPattern: String) : SettingsEvent
+    data object ForceRebindNotificationListener : SettingsEvent
 }

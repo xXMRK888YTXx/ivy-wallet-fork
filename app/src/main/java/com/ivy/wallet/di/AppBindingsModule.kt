@@ -17,4 +17,7 @@ abstract class AppBindingsModule {
 
     @Binds
     abstract fun telegramBackupWorkerNotificationProvider(impl: TelegramBackupWorkerNotificationProviderImpl): TelegramBackupWorkerNotificationProvider
+
+    @Binds
+    abstract fun notificationParserController(impl: com.ivy.wallet.service.NotificationParserControllerImpl): com.ivy.domain.NotificationParserController
 }

@@ -8,12 +8,15 @@ import androidx.work.WorkerParameters
 import com.ivy.data.backup.TelegramBackupDataUseCase
 import com.ivy.data.workManager.TelegramBackupWorkerNotificationProvider
 import com.ivy.data.workManager.worker.TelegramBackupWorker
+import com.ivy.domain.NotificationParserController
 import javax.inject.Inject
+import javax.inject.Provider
 
 class IvyWorkerFactory @Inject constructor(
     private val hiltWorkerFactory: HiltWorkerFactory,
     private val telegramBackupDataUseCase: TelegramBackupDataUseCase,
-    private val telegramBackupWorkerNotificationProvider: TelegramBackupWorkerNotificationProvider
+    private val telegramBackupWorkerNotificationProvider: TelegramBackupWorkerNotificationProvider,
+    private val notificationParserController: Provider<NotificationParserController>
 ) : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
@@ -26,6 +29,13 @@ class IvyWorkerFactory @Inject constructor(
             telegramBackupDataUseCase,
             telegramBackupWorkerNotificationProvider
         )
+
+        com.ivy.wallet.service.NotificationWatchdogWorker::class.java.name ->
+            com.ivy.wallet.service.NotificationWatchdogWorker(
+                appContext,
+                workerParameters,
+                notificationParserController.get()
+            )
 
         else -> hiltWorkerFactory.createWorker(appContext, workerClassName, workerParameters)
     }

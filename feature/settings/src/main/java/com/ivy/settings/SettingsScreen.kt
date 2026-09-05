@@ -54,7 +54,6 @@ import com.ivy.navigation.FeaturesScreen
 import com.ivy.navigation.ImportScreen
 import com.ivy.navigation.Navigation
 import com.ivy.navigation.ReleasesScreen
-import com.ivy.navigation.Screen
 import com.ivy.navigation.TelegramBackupScreen
 import com.ivy.navigation.navigation
 import com.ivy.navigation.screenScopedViewModel
@@ -154,6 +153,10 @@ fun BoxWithConstraintsScope.SettingsScreen() {
         },
         onSetNotificationRegexPattern = {
             viewModel.onEvent(SettingsEvent.SetNotificationRegexPattern(it))
+        },
+        isNotificationListenerConnected = uiState.isNotificationListenerConnected,
+        onForceRebindNotificationListener = {
+            viewModel.onEvent(SettingsEvent.ForceRebindNotificationListener)
         }
     )
 }
@@ -193,7 +196,9 @@ private fun BoxWithConstraintsScope.UI(
     notificationRegexPattern: String = "",
     onSetNotificationParserEnabled: (Boolean) -> Unit = {},
     onSetNotificationTargetPackage: (String) -> Unit = {},
-    onSetNotificationRegexPattern: (String) -> Unit = {}
+    onSetNotificationRegexPattern: (String) -> Unit = {},
+    isNotificationListenerConnected: Boolean = false,
+    onForceRebindNotificationListener: () -> Unit = {}
 ) {
     var currencyModalVisible by remember { mutableStateOf(false) }
     var nameModalVisible by remember { mutableStateOf(false) }
@@ -432,7 +437,9 @@ private fun BoxWithConstraintsScope.UI(
                 regexPattern = notificationRegexPattern,
                 onSetEnabled = onSetNotificationParserEnabled,
                 onSetTargetPackage = onSetNotificationTargetPackage,
-                onSetRegexPattern = onSetNotificationRegexPattern
+                onSetRegexPattern = onSetNotificationRegexPattern,
+                isServiceConnected = isNotificationListenerConnected,
+                onForceRebind = onForceRebindNotificationListener
             )
         }
 

@@ -16,5 +16,6 @@ data class SettingsState(
     val languageOptionVisible: Boolean,
     val notificationParserEnabled: Boolean = false,
     val notificationTargetPackage: String = "",
-    val notificationRegexPattern: String = "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?"
+    val notificationRegexPattern: String = "\\(?(-?\\d+(?:[\\.,]\\d+)?)\\s*([A-Za-z]{3})\\)?",
+    val isNotificationListenerConnected: Boolean = false
 )
